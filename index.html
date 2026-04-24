@@ -1,0 +1,732 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  color-scheme: light dark;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  --border-radius-md: 12px;
+
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f6f7f9;
+  --color-background-tertiary:#eef1f4;
+  --color-text-primary:#0f172a;
+  --color-text-secondary:#334155;
+  --color-text-tertiary:#64748b;
+  --color-border-secondary:rgba(15, 23, 42, 0.22);
+  --color-border-tertiary:rgba(15, 23, 42, 0.12);
+
+  --shadow-elev-1: 0 1px 1px rgba(2, 6, 23, 0.06), 0 10px 28px rgba(2, 6, 23, 0.06);
+  --focus-ring: 0 0 0 3px rgba(55, 138, 221, 0.28);
+}
+:root[data-theme="dark"]{
+  --color-background-primary:#0b1220;
+  --color-background-secondary:#0f1a2c;
+  --color-background-tertiary:#15233a;
+  --color-text-primary:#e6edf6;
+  --color-text-secondary:#c4d1e1;
+  --color-text-tertiary:#8aa0ba;
+  --color-border-secondary:rgba(230, 237, 246, 0.24);
+  --color-border-tertiary:rgba(230, 237, 246, 0.14);
+
+  --shadow-elev-1: 0 1px 1px rgba(0, 0, 0, 0.2), 0 14px 34px rgba(0, 0, 0, 0.35);
+  --focus-ring: 0 0 0 3px rgba(55, 138, 221, 0.35);
+}
+
+html,body{height:100%}
+body{
+  font-family:var(--font-sans);
+  background:var(--color-background-primary);
+  color:var(--color-text-primary);
+}
+.root{padding:1.25rem 0 2.25rem}
+.container{width:min(1120px, calc(100% - 32px));margin:0 auto}
+.topbar{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-bottom:0.75rem}
+.title{font-size:14px;font-weight:600;letter-spacing:0.01em;color:var(--color-text-primary);line-height:1.25}
+.subtitle{font-size:12px;color:var(--color-text-tertiary);margin-top:2px;line-height:1.35}
+.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.toggle{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:999px;
+  border:0.5px solid var(--color-border-secondary);
+  background:var(--color-background-secondary);
+  color:var(--color-text-primary);
+  cursor:pointer;user-select:none;
+  transition:transform 0.06s ease, background 0.12s ease, border-color 0.12s ease;
+  font-size:12px;font-weight:600;
+}
+.toggle:active{transform:translateY(1px)}
+.toggle:hover{border-color:var(--color-border-secondary)}
+.toggle:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.toggle .dot{width:10px;height:10px;border-radius:999px;background:var(--color-text-primary);opacity:0.85}
+.toggle .hint{font-weight:500;color:var(--color-text-tertiary)}
+.toggle[data-mode="dark"] .dot{background:#b7a5ff}
+.toggle[data-mode="light"] .dot{background:#0f172a}
+
+.persona-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:0.5rem}
+.ptab{font-size:11px;padding:5px 12px;border-radius:999px;border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all 0.12s}
+.ptab.on{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.search-row{display:flex;gap:8px;margin-bottom:1rem;align-items:center}
+.search-row input{flex:1;font-size:13px;padding:9px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary)}
+.search-row input:focus-visible{outline:none;box-shadow:var(--focus-ring);border-color:rgba(55, 138, 221, 0.55)}
+.count-label{font-size:12px;color:var(--color-text-tertiary);white-space:nowrap}
+.domain-block{margin-bottom:1.2rem}
+.domain-hdr{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);cursor:pointer;border:0.5px solid var(--color-border-tertiary);margin-bottom:2px;box-shadow:var(--shadow-elev-1)}
+.domain-hdr:hover{border-color:var(--color-border-secondary)}
+.domain-name{font-size:13px;font-weight:500;color:var(--color-text-primary);flex:1}
+.domain-count{font-size:11px;color:var(--color-text-tertiary)}
+.chevron{font-size:10px;color:var(--color-text-tertiary);transition:transform 0.15s}
+.chevron.open{transform:rotate(90deg)}
+.alp-badge{font-size:9px;padding:2px 8px;border-radius:10px;background:#7B2D8B;color:#fff;font-weight:500}
+.feat-table{display:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden}
+.feat-table.open{display:block}
+.feat-row{display:grid;grid-template-columns:2fr 1.2fr 80px 80px;gap:0;border-bottom:0.5px solid var(--color-border-tertiary);padding:8px 14px;align-items:center}
+.feat-row:last-child{border-bottom:none}
+.feat-row:hover{background:var(--color-background-secondary)}
+.feat-row.hdr{background:var(--color-background-tertiary);padding:6px 14px}
+.feat-row.alp-row{background:rgba(123,45,139,0.05)}
+.feat-name{font-size:12px;color:var(--color-text-primary);line-height:1.4}
+.feat-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.4}
+.feat-hdr-label{font-size:10px;color:var(--color-text-tertiary);font-weight:500;letter-spacing:0.03em}
+.pill{font-size:9px;padding:2px 7px;border-radius:10px;display:inline-block;margin:1px}
+.p-s{background:#E1F5EE;color:#0F6E56}
+.p-f{background:#E6F1FB;color:#185FA5}
+.p-a{background:#EEEDFE;color:#534AB7}
+.p-r{background:#FAEEDA;color:#854F0B}
+.p-m{background:#FBEAF0;color:#993556}
+.p-p{background:#F0E6F8;color:#7B2D8B}
+.ch-web{font-size:10px;color:var(--color-text-tertiary)}
+.ch-mob{font-size:10px;color:#1D9E75}
+.ch-both{font-size:10px;color:#185FA5}
+.prio-core{font-size:9px;padding:2px 6px;border-radius:8px;background:#E1F5EE;color:#0F6E56}
+.prio-opt{font-size:9px;padding:2px 6px;border-radius:8px;background:#E6F1FB;color:#185FA5}
+.prio-gth{font-size:9px;padding:2px 6px;border-radius:8px;background:#FAEEDA;color:#854F0B}
+.prio-alp{font-size:9px;padding:2px 6px;border-radius:8px;background:#F0E6F8;color:#7B2D8B}
+.legend-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1rem}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+
+:root[data-theme="dark"] .p-s{background:#085041;color:#9FE1CB}
+:root[data-theme="dark"] .p-f{background:#0C447C;color:#B5D4F4}
+:root[data-theme="dark"] .p-a{background:#3C3489;color:#CECBF6}
+:root[data-theme="dark"] .p-r{background:#633806;color:#FAC775}
+:root[data-theme="dark"] .p-m{background:#72243E;color:#F4C0D1}
+:root[data-theme="dark"] .p-p{background:#4A1060;color:#D9AAEC}
+:root[data-theme="dark"] .prio-core{background:#085041;color:#9FE1CB}
+:root[data-theme="dark"] .prio-opt{background:#0C447C;color:#B5D4F4}
+:root[data-theme="dark"] .prio-gth{background:#633806;color:#FAC775}
+:root[data-theme="dark"] .prio-alp{background:#4A1060;color:#D9AAEC}
+:root[data-theme="dark"] .feat-row.alp-row{background:rgba(123,45,139,0.12)}
+
+@media (max-width: 860px){
+  .feat-row{grid-template-columns: 1.8fr 1.1fr 70px 74px}
+}
+@media (max-width: 720px){
+  .topbar{align-items:stretch}
+  .actions{justify-content:flex-start}
+  .feat-row{grid-template-columns: 1.6fr 1fr 64px 72px}
+}
+</style>
+
+<div class="root">
+
+<div class="container">
+
+<div class="topbar">
+  <div>
+    <div class="title">University App Feature Matrix</div>
+    <div class="subtitle">Search, filter by persona, and expand domains. Use the toggle to switch between light and dark.</div>
+  </div>
+  <div class="actions">
+    <button class="toggle" id="themeToggle" type="button" aria-label="Toggle theme">
+      <span class="dot" aria-hidden="true"></span>
+      <span id="themeLabel">Theme</span>
+      <span class="hint" id="themeHint">(auto)</span>
+    </button>
+  </div>
+</div>
+
+<div class="persona-tabs">
+  <button class="ptab on" onclick="filterPersona('all',this)">All personas</button>
+  <button class="ptab" onclick="filterPersona('S',this)">Student</button>
+  <button class="ptab" onclick="filterPersona('F',this)">Faculty</button>
+  <button class="ptab" onclick="filterPersona('A',this)">Admin</button>
+  <button class="ptab" onclick="filterPersona('R',this)">Registrar</button>
+  <button class="ptab" onclick="filterPersona('M',this)">Management</button>
+  <button class="ptab" onclick="filterPersona('P',this)">Parent</button>
+</div>
+
+<div class="search-row">
+  <input type="text" id="srch" placeholder="Search features... (try 'ALP', 'tier', 'certification')" oninput="doSearch()">
+  <span class="count-label" id="cnt">loading...</span>
+</div>
+
+<div class="legend-row">
+  <div class="leg"><div class="leg-dot" style="background:#1D9E75"></div>Core</div>
+  <div class="leg"><div class="leg-dot" style="background:#378ADD"></div>Optional</div>
+  <div class="leg"><div class="leg-dot" style="background:#EF9F27"></div>Good to have</div>
+  <div class="leg"><div class="leg-dot" style="background:#7B2D8B"></div>ALP Feature</div>
+  <div class="leg" style="margin-left:6px">
+    <span class="p-s">S</span>&nbsp;Student&nbsp;
+    <span class="p-f">F</span>&nbsp;Faculty&nbsp;
+    <span class="p-a">A</span>&nbsp;Admin&nbsp;
+    <span class="p-r">R</span>&nbsp;Registrar&nbsp;
+    <span class="p-m">M</span>&nbsp;Mgmt&nbsp;
+    <span class="p-p">P</span>&nbsp;Parent
+  </div>
+  <div class="leg" style="margin-left:6px">
+    <span class="ch-mob">Mob</span>&nbsp;Mobile&nbsp;
+    <span class="ch-web">Web</span>&nbsp;Web only&nbsp;
+    <span class="ch-both">Both</span>
+  </div>
+</div>
+
+<div id="domains"></div>
+</div>
+</div>
+
+<script>
+const DATA = [
+{domain:"01. Identity & Access Management", color:"#534AB7", features:[
+["Single Sign-On (SSO) with university credentials","Login once, access all services","S F A R M","Both","core",false],
+["Role-based access control (RBAC)","Fine-grained permissions per role and module","A M","Web","core",false],
+["Multi-factor authentication (MFA / OTP)","SMS, email or authenticator app 2FA","S F A","Both","core",false],
+["Biometric login (fingerprint / face ID)","Device-level biometric for mobile app","S F","Mob","core",false],
+["Digital student / staff ID card","Photo, barcode, QR code on phone","S F","Mob","core",false],
+["NFC / Mobile Key for door access","Phone unlocks campus doors","S F","Mob","gth",false],
+["Session management & device list","View and revoke active sessions","S F A","Both","opt",false],
+["Guest / visitor access portal","Temporary credentials for visitors","A","Web","opt",false],
+["Forgot password & self-service reset","Email/SMS-based password recovery","S F A","Both","core",false],
+["Profile management","Update photo, contact info, emergency contacts","S F","Both","core",false],
+]},
+{domain:"02. Admissions & Enrollment", color:"#185FA5", features:[
+["Online application portal","Submit application with documents","S","Both","core",false],
+["Application status tracking","Real-time updates on acceptance","S A","Both","core",false],
+["Document upload & verification","Transcripts, ID, certificates upload","S A","Both","core",false],
+["Entrance exam / test registration","Book and manage entrance tests","S A","Both","core",false],
+["Merit list & seat allocation","Automated rank-based seat assignment","A R","Web","core",false],
+["Offer letter generation","Auto-generate and send offer letters","A","Web","core",false],
+["Enrollment confirmation & fee payment","Accept offer and pay admission fee","S","Both","core",false],
+["Program selection & specialization","Choose branch, major, electives","S A","Both","core",false],
+["Lateral entry / transfer admission","Handle mid-course admissions","A R","Web","opt",false],
+["International student admission","Country-specific docs, visa checks","S A","Web","opt",false],
+["Scholarship application at admission","Apply for aid during application","S A","Both","opt",false],
+["Waiting list management","Auto-promote from waitlist","A R","Web","core",false],
+["Prospectus & course catalog","Browse all programs and courses","S","Both","core",false],
+["Virtual campus tour (for applicants)","360° campus walkthrough for prospects","S","Mob","gth",false],
+["Agent / counsellor portal","Manage applications via agents","A","Web","opt",false],
+]},
+{domain:"03. Student Information System (SIS)", color:"#0F6E56", features:[
+["Student master record","Complete academic profile, roll no., batch","S A R","Web","core",false],
+["Programme & course structure","Manage degree requirements, credit framework","A R","Web","core",false],
+["Batch & section management","Assign students to batches and sections","A R","Web","core",false],
+["Semester / academic year management","Create and manage academic periods","A R","Web","core",false],
+["Course registration & add-drop","Register for courses, add/drop within window","S","Both","core",false],
+["Course catalog browsing","Browse available courses with syllabus","S F","Both","core",false],
+["Elective subject selection","Choose electives with seat availability","S A","Both","core",false],
+["Prerequisite & conflict validation","Auto-check pre-reqs before enrollment","S A","Both","core",false],
+["Student academic history","Full semester-wise grade record","S A R","Web","core",false],
+["Promotion / year-up rules","Automated promotion based on credits/grades","A R","Web","core",false],
+["Re-admission & re-enrollment","Handle returning/gap students","A R","Web","opt",false],
+["Student ID card printing","Generate printable physical ID cards","A","Web","core",false],
+["Degree audit tool","Check graduation requirements completion","S A R","Both","core",false],
+["Alumni conversion on graduation","Auto-convert to alumni status","A","Web","opt",false],
+]},
+{domain:"04. Academic Timetable & Scheduling", color:"#854F0B", features:[
+["Automated timetable generation","AI/rule-based conflict-free schedule creation","A","Web","core",false],
+["Manual timetable override","Admin can manually edit slots","A","Web","core",false],
+["Faculty workload assignment","Assign courses to faculty with load limits","A F","Web","core",false],
+["Room / classroom allocation","Assign halls based on capacity and type","A","Web","core",false],
+["Student timetable view","Personal class schedule for students","S","Both","core",false],
+["Faculty timetable view","All assigned classes for faculty","F","Both","core",false],
+["Timetable change notifications","Alerts when class is rescheduled/cancelled","S F","Both","core",false],
+["Substitute faculty assignment","Temporary replacement for absent faculty","A F","Web","opt",false],
+["Lab & special room scheduling","Schedule labs, studios, simulation rooms","A F","Web","opt",false],
+["Holiday & academic calendar","Published academic calendar with events","S F A","Both","core",false],
+["Exam timetable scheduling","Generate and publish exam schedules","A R","Web","core",false],
+["Clash detection & resolution","Detect student/faculty scheduling clashes","A","Web","core",false],
+]},
+{domain:"05. Attendance Management", color:"#993C1D", features:[
+["Faculty marks attendance in-app","Real-time attendance during class","F","Mob","core",false],
+["Student attendance view","See attendance % per subject","S","Both","core",false],
+["Biometric attendance integration","Fingerprint/face scanner sync","A","Web","opt",false],
+["QR code attendance","Student scans QR in class to mark present","S F","Mob","opt",false],
+["GPS-based attendance","Geofenced check-in from campus location","S","Mob","opt",false],
+["Attendance shortage alerts","Auto-alert when student drops below threshold","S F A","Both","core",false],
+["Leave of absence requests","Students apply for leaves, faculty approves","S F","Both","core",false],
+["Medical leave with document upload","Upload medical certificate for ML","S A","Both","core",false],
+["Attendance regularization","Faculty can correct wrongly marked attendance","F A","Web","opt",false],
+["Attendance reports (per subject/dept)","Detailed reports for admin review","A F","Web","core",false],
+["Minimum attendance enforcement","Block exam registration if short","S A R","Web","core",false],
+["Parent/guardian attendance alerts","SMS/email alerts to parents","A P","Web","opt",false],
+]},
+{domain:"06. Learning Management System (LMS)", color:"#185FA5", features:[
+["Course content upload (PDF, video, PPT)","Faculty uploads study materials","F","Both","core",false],
+["Content organization by module/week","Structured course layout","F","Web","core",false],
+["Student content access","Download or stream course materials","S","Both","core",false],
+["Video lecture hosting & streaming","In-app video player with progress tracking","F S","Both","core",false],
+["Live class (Zoom/Teams integration)","Launch live sessions within the app","F S","Both","core",false],
+["Recorded lecture archive","Access past class recordings","S F","Both","core",false],
+["Syllabus management","Publish and version course syllabus","F A","Web","core",false],
+["Discussion forum per course","Q&A threads per subject","S F","Both","core",false],
+["Announcements by faculty","Course-level broadcast messages","F","Both","core",false],
+["Assignment creation & rubric","Faculty creates assignments with marking guide","F","Web","core",false],
+["Assignment submission","Student submits files/text for assignments","S","Both","core",false],
+["Assignment grading & feedback","Faculty grades with comments","F","Web","core",false],
+["Plagiarism detection integration","Check submission against Turnitin/Unicheck","F A","Web","opt",false],
+["Quiz / MCQ engine","Online quizzes with timer and auto-grade","F S","Both","core",false],
+["Question bank management","Build and reuse question banks","F","Web","opt",false],
+["Adaptive assessment (AI)","Questions adapt to student performance","F","Web","gth",false],
+["Course completion tracking","Progress % per course for student","S F","Both","core",false],
+["Co-curricular activity logging","Log activities outside academics","S A","Both","opt",false],
+]},
+{domain:"07. Examination Management", color:"#534AB7", features:[
+["Exam schedule creation","Admin creates exam timetable","A R","Web","core",false],
+["Hall ticket generation","Auto-generate admit cards with rules","S A R","Both","core",false],
+["Seating arrangement generation","Randomized seating for exam halls","A","Web","core",false],
+["Room invigilator assignment","Assign faculty as invigilators","A F","Web","core",false],
+["Internal marks entry","Faculty enters internal/sessional marks","F","Web","core",false],
+["External mark entry","Results entry for university exams","A R","Web","core",false],
+["Grade calculation & GPA/CGPA","Automated grade point calculation","A R","Web","core",false],
+["Result declaration & publishing","Publish results to students","A R S","Both","core",false],
+["Revaluation / re-totalling request","Student applies for re-checking","S A R","Both","opt",false],
+["Supplementary exam management","Handle back-log / arrear exam process","A R","Web","opt",false],
+["Online exam proctoring","AI-based proctoring for remote exams","A S","Both","opt",false],
+["Certificate & transcript generation","Auto-generate transcripts, degree certs","A R S","Web","core",false],
+["Marksheet download","PDF marksheet for students","S","Both","core",false],
+["Exam fee payment","Pay exam fees online","S","Both","core",false],
+["Attendance eligibility check","Block from exam if attendance short","A R","Web","core",false],
+]},
+{domain:"08. Finance & Fee Management", color:"#0F6E56", features:[
+["Fee structure configuration","Admin sets fee heads, amounts, schedule","A","Web","core",false],
+["Fee challan / demand note generation","Generate individual fee bills","S A","Both","core",false],
+["Online fee payment (card/UPI/netbanking)","Pay fees via payment gateway","S","Both","core",false],
+["Payment receipts & history","Download official receipts","S A","Both","core",false],
+["Fee due reminders (push/SMS/email)","Automated reminders before deadline","S A P","Both","core",false],
+["Installment / EMI plans","Split fees into installments","S A","Web","opt",false],
+["Late fee penalty automation","Auto-apply late fee after deadline","A","Web","core",false],
+["Financial aid / scholarship disbursement","Credit scholarship to student account","A S","Web","core",false],
+["Refund management","Process and track fee refunds","A S","Web","opt",false],
+["Hostel & transport fee bundling","Combined billing for add-on services","A S","Both","opt",false],
+["Accounts receivable dashboard","Outstanding fee collection overview","A M","Web","core",false],
+["Budget planning & allocation","Annual departmental budget management","A M","Web","core",false],
+["Expense tracking & vouchers","Track institutional expenditure","A M","Web","core",false],
+["Financial reporting (P&L, balance sheet)","Standard financial statements","A M","Web","core",false],
+["Audit trail for all transactions","Immutable log of financial events","A M","Web","core",false],
+["Payroll management","Staff salary, deductions, PF, tax","A M","Web","core",false],
+["Vendor payment management","Process vendor invoices and payments","A M","Web","opt",false],
+["GST & tax compliance","Tax-ready financial reports","A M","Web","core",false],
+["Student loan / bank tie-up portal","Apply for education loan via partner banks","S A","Web","opt",false],
+]},
+{domain:"09. Human Resources (HR) & Faculty", color:"#993556", features:[
+["Employee master database","Complete employee records","A","Web","core",false],
+["Recruitment & job posting","Post positions, manage applications","A M","Web","core",false],
+["Onboarding workflow","New hire checklists, document collection","A","Web","opt",false],
+["Employee profile & documents","Store contracts, degrees, certificates","F A","Web","core",false],
+["Attendance & leave management (staff)","Apply and approve staff leaves","F A","Web","core",false],
+["Payroll processing","Salary calculation, payslip generation","A M","Web","core",false],
+["Tax filing support (Form 16, TDS)","Tax documents for employees","F A","Web","core",false],
+["Performance appraisal system","Annual review process, KPIs","F A M","Web","opt",false],
+["Training & development tracking","Log faculty training and workshops","F A","Web","opt",false],
+["Faculty workload report","Teaching hours, research, admin duties","F A M","Web","core",false],
+["Retirement & separation management","Exit process, full & final settlement","A M","Web","opt",false],
+["Organization hierarchy management","Departments, designations, reporting lines","A M","Web","core",false],
+["Faculty research profile","Publications, patents, projects","F A","Both","opt",false],
+["Faculty feedback / 360-degree review","Student and peer feedback on faculty","S F A","Web","opt",false],
+["Recruitment committee workflows","Shortlisting, interview scheduling","A M","Web","opt",false],
+]},
+{domain:"10. Library Management", color:"#185FA5", features:[
+["Book catalog search","Search by title, author, ISBN, subject","S F","Both","core",false],
+["E-book & journal access","Access digital resources and databases","S F","Both","core",false],
+["Book issue & return tracking","Track borrowed books and due dates","S A","Both","core",false],
+["Fine calculation for overdue","Auto-calculate late return fines","S A","Both","core",false],
+["Book reservation / hold","Reserve a book currently on loan","S","Both","opt",false],
+["Study room booking","Reserve library study rooms","S","Both","opt",false],
+["New arrivals notification","Alerts when new books are added","S F","Both","gth",false],
+["Inter-library loan","Request books from other libraries","S A","Web","opt",false],
+["Research database subscriptions","Manage Scopus, JSTOR, IEEE access","A","Web","opt",false],
+["Reading history & suggestions","Personalized book recommendations","S","Both","gth",false],
+["Library membership card (digital)","Digital library card in app","S","Mob","opt",false],
+["Inventory & catalog management","Admin manages library stock","A","Web","core",false],
+]},
+{domain:"11. Hostel & Accommodation", color:"#0F6E56", features:[
+["Hostel application & preference","Apply for hostel and choose preferences","S","Both","core",false],
+["Room allocation & assignment","Auto-assign rooms based on criteria","A","Web","core",false],
+["Hostel fee payment","Pay hostel dues online","S","Both","core",false],
+["Hostel rules & handbook","Digital version of hostel rulebook","S","Both","opt",false],
+["Room maintenance requests","Raise and track repair requests","S A","Both","opt",false],
+["Visitor management","Register and track visitors","A S","Mob","opt",false],
+["Hostel mess / meal plan","Select meal plan, view menu","S","Both","opt",false],
+["Room change / transfer requests","Apply for room change","S A","Both","opt",false],
+["Hostel warden dashboard","Overview of occupancy, issues","A","Web","core",false],
+["Attendance / curfew tracking","Track hostel in/out timings","A","Web","opt",false],
+["Hostel notice board","Announcements from hostel admin","S A","Both","opt",false],
+["Laundry scheduling (if applicable)","Book laundry slots","S","Mob","gth",false],
+]},
+{domain:"12. Transport Management", color:"#854F0B", features:[
+["Bus route & stop information","View all routes and stops","S F","Both","core",false],
+["Real-time bus tracking","Live GPS location of campus buses","S","Mob","opt",false],
+["Bus pass application & renewal","Apply or renew bus pass online","S A","Both","opt",false],
+["Bus pass fee payment","Pay transport fee","S","Both","opt",false],
+["Shuttle schedule","Campus internal shuttle timings","S F","Both","opt",false],
+["Transport request for events","Request vehicles for official events","F A","Web","opt",false],
+["Driver & vehicle management","Manage fleet and drivers","A","Web","opt",false],
+["Safe night ride / campus cab","Book a safe ride within campus at night","S","Mob","gth",false],
+["Parking slot booking","Reserve parking space","S F","Mob","gth",false],
+["Transport grievance / complaints","Report issues with buses","S","Both","opt",false],
+]},
+{domain:"13. Health & Wellness", color:"#993C1D", features:[
+["Campus clinic appointment booking","Book doctor/nurse appointments","S F","Both","opt",false],
+["Health record management","Store vaccination, medical history","S A","Both","opt",false],
+["Prescription & medication tracking","Record prescriptions issued","A S","Web","opt",false],
+["Mental health counselling booking","Book sessions with counsellors","S","Both","opt",false],
+["Mental health resources library","Articles, self-help tools, helplines","S","Both","opt",false],
+["Insurance card & claims","View insurance details, file claims","S A","Both","opt",false],
+["Vaccination tracking & reminders","Track mandatory vaccinations","S A","Both","opt",false],
+["Emergency health alert","SOS button to campus medical team","S","Mob","core",false],
+["Fitness centre / gym booking","Book gym slots and classes","S","Mob","gth",false],
+["Wellness programs & events","Yoga, meditation events on campus","S","Both","gth",false],
+]},
+{domain:"14. Dining & Cafeteria", color:"#534AB7", features:[
+["Daily menu display","View today's menu for all outlets","S F","Both","opt",false],
+["Meal plan subscription","Buy and manage prepaid meal plans","S A","Both","opt",false],
+["Mobile food ordering & pickup","Pre-order food, skip the queue","S","Mob","opt",false],
+["Dining wallet & top-up","Campus digital wallet for food","S A","Both","opt",false],
+["Nutritional information","Calorie and allergen info per item","S","Both","gth",false],
+["Cafeteria occupancy / crowd level","Know how busy the cafeteria is","S","Mob","gth",false],
+["Feedback & ratings","Rate food and dining experience","S","Both","opt",false],
+["Special dietary preference","Register preferences (veg, halal etc.)","S A","Both","opt",false],
+["Cafeteria vendor management","Manage multiple food vendors/stalls","A","Web","opt",false],
+]},
+{domain:"15. Events, Clubs & Student Life", color:"#185FA5", features:[
+["Campus events discovery","Browse all upcoming events","S F","Both","core",false],
+["Event registration","Register for events, get e-tickets","S","Both","core",false],
+["Club & society directory","Browse all registered clubs","S","Both","core",false],
+["Club membership application","Join clubs via the app","S","Both","core",false],
+["Club management portal","Manage members, events, funds","S A","Both","opt",false],
+["Event creation & management","Create and publish events","S F A","Web","opt",false],
+["Event attendance tracking","Track who attended events","A","Web","opt",false],
+["Event feedback & ratings","Post-event survey","S","Both","opt",false],
+["Student government portal","Elections, council communications","S A","Web","opt",false],
+["Cultural fest management","Manage large fest registrations and programs","S A","Web","gth",false],
+["Sports events & tournaments","Intra/inter college sports schedules","S","Both","opt",false],
+["Volunteering & social activities","Sign up for NSS, NCC, volunteer work","S","Both","opt",false],
+["Lost & found","Report or search for lost items on campus","S","Both","gth",false],
+["Campus notice board","General announcements for all","S F A","Both","core",false],
+]},
+{domain:"16. Career & Placements", color:"#0F6E56", features:[
+["Job & internship listings","Browse openings posted by companies","S","Both","core",false],
+["Resume / CV builder","Build and download professional resume","S","Both","opt",false],
+["Resume shortlisting by companies","Recruiters filter resumes on portal","A","Web","core",false],
+["Interview schedule & slot booking","Auto-schedule interviews, notify students","S A","Web","core",false],
+["Campus recruitment drive management","Manage entire placement season","A M","Web","core",false],
+["Placement statistics & reports","Placed students, avg package, top recruiters","S A M","Both","opt",false],
+["Company registration & empanelment","Onboard new companies to campus","A","Web","opt",false],
+["Offer letter tracking","Track received/accepted offers","S A","Both","core",false],
+["Pre-placement training","Aptitude, coding, GD/PI workshops","S A","Both","opt",false],
+["Mock interview scheduling","Book practice interviews with mentors","S","Both","opt",false],
+["Alumni mentorship matching","Connect students with alumni mentors","S A","Both","gth",false],
+["CGPA / eligibility filter for jobs","Auto-filter eligible students for drives","A S","Web","core",false],
+]},
+{domain:"17. Communication & Notifications", color:"#854F0B", features:[
+["In-app messaging (student↔faculty)","Direct secure messages","S F","Both","core",false],
+["Group / class announcements","Broadcast to a batch or section","F A","Both","core",false],
+["Push notifications","Real-time alerts for all events","S F A","Mob","core",false],
+["Email integration","Send and receive university email","S F A","Both","core",false],
+["SMS / WhatsApp notifications","Important alerts via SMS/WA","A S","Web","core",false],
+["Emergency campus-wide alerts","SOS / disaster alerts for all","A","Both","core",false],
+["Notice board (department-wise)","Dept-specific notices","F A S","Both","core",false],
+["Parent / guardian portal notifications","Attendance, fees, results alerts to parents","A P","Both","opt",false],
+["Feedback & grievance messaging","Submit and track complaints","S F","Both","opt",false],
+["Internal ticketing / helpdesk","Submit IT, admin, facility issues","S F A","Both","opt",false],
+]},
+{domain:"18. Research & Innovation", color:"#534AB7", features:[
+["Research project registration","Register ongoing research projects","F A","Web","opt",false],
+["Grant & funding application","Apply for internal/external research grants","F A","Web","opt",false],
+["Lab / equipment booking","Book research labs and equipment","F S","Both","opt",false],
+["Publication tracking","Log journal papers, conferences","F A","Web","opt",false],
+["Patent & IP management","Register and track university patents","F A","Web","gth",false],
+["Research collaboration portal","Find collaborators internally","F","Web","gth",false],
+["Ethics committee submission","Submit research ethics applications","F A","Web","opt",false],
+["Student project / thesis management","Assign guides, track thesis progress","S F","Web","opt",false],
+["Industry collaboration portal","Manage industry-sponsored projects","F A M","Web","opt",false],
+["Research analytics dashboard","Metrics: publications, citations, h-index","F A M","Web","gth",false],
+]},
+{domain:"19. Facilities & Asset Management", color:"#993556", features:[
+["Classroom / seminar hall booking","Reserve rooms for events/meetings","S F A","Both","opt",false],
+["Sports facility booking","Book courts, fields, gym slots","S F","Both","opt",false],
+["Asset inventory management","Track furniture, equipment, IT assets","A","Web","core",false],
+["Asset procurement workflow","Raise purchase requests, approvals","A M","Web","opt",false],
+["Maintenance request & tracking","Report and track facility repairs","S F A","Both","opt",false],
+["Housekeeping management","Assign and track cleaning tasks","A","Web","opt",false],
+["Energy / utility monitoring","Track electricity, water usage","A M","Web","gth",false],
+["Safety & security incident reporting","Log and track security incidents","A S","Both","opt",false],
+["Vendor / contractor management","Manage service vendors and contracts","A M","Web","opt",false],
+["Campus map — indoor & outdoor","Navigate campus in app","S F","Mob","opt",false],
+]},
+{domain:"20. Analytics, Reports & BI", color:"#185FA5", features:[
+["Student performance dashboard","Individual and cohort academic analytics","S F A","Web","core",false],
+["Enrollment & intake analytics","Track admissions trends over years","A M","Web","core",false],
+["Attendance analytics","Attendance patterns by dept/subject","F A M","Web","core",false],
+["Financial MIS reports","Revenue, outstanding fees, budget vs actual","A M","Web","core",false],
+["Placement analytics","Placement rate, package distribution","A M S","Web","opt",false],
+["At-risk student identification","Flag students likely to fail/drop out","A F","Web","opt",false],
+["Faculty performance metrics","Teaching load, student feedback scores","A M","Web","opt",false],
+["Research output analytics","Publications, grants, patents metrics","A M","Web","opt",false],
+["Custom report builder","Build ad-hoc reports from any module","A M","Web","opt",false],
+["Regulatory / compliance reports","NAAC, NIRF, UGC, AICTE-ready reports","A M","Web","core",false],
+["Executive dashboard (VC/Principal)","High-level KPIs for leadership","M","Web","opt",false],
+["Data export (Excel, PDF, CSV)","Export any report for offline use","A M","Web","core",false],
+]},
+{domain:"21. Grievance & Feedback", color:"#993C1D", features:[
+["Student grievance portal","Submit complaints formally","S","Both","core",false],
+["Anti-ragging complaint system","Anonymous ragging reports","S A","Both","core",false],
+["Grievance tracking & escalation","Track status and escalate if unresolved","S A","Both","core",false],
+["Faculty grievance system","Faculty complaints to admin/HR","F A","Web","opt",false],
+["End-of-semester course feedback","Anonymous faculty rating by students","S A","Web","core",false],
+["Exit survey for graduates","Feedback at graduation","S A","Web","opt",false],
+["Parent satisfaction survey","Periodic parent feedback","A M P","Web","opt",false],
+["Feedback analytics dashboard","Sentiment and score trends","A M","Web","opt",false],
+["Right to information (RTI) portal","Handle RTI applications","A M","Web","opt",false],
+]},
+{domain:"22. Alumni Management", color:"#0F6E56", features:[
+["Alumni registration & profile","Alumni sign up post-graduation","S A","Both","opt",false],
+["Alumni directory & search","Find classmates and seniors","S","Both","opt",false],
+["Alumni events & reunions","Announce and manage alumni events","A S","Both","opt",false],
+["Alumni giving / donations portal","Accept donations, show impact","A","Web","gth",false],
+["Alumni job board","Alumni post jobs for current students","S A","Both","gth",false],
+["Mentorship programme","Alumni mentor students","S A","Both","gth",false],
+["Alumni magazine / newsletter","Digital publications for alumni","A","Both","gth",false],
+["Alumni chapter management","Region-wise alumni groups","A","Web","gth",false],
+]},
+{domain:"23. Campus Safety & Security", color:"#712B13", features:[
+["SOS / emergency button","Instant alert to security team","S","Mob","core",false],
+["Campus CCTV monitoring integration","Security team views feeds","A","Web","opt",false],
+["Visitor entry management","Log and verify visitor entry","A","Web","opt",false],
+["Night-time safety check-in","Periodic safety pings for students","S A","Mob","opt",false],
+["Security incident reporting","Report suspicious activity","S A","Both","opt",false],
+["Lost & found management","Track lost items campus-wide","S A","Both","opt",false],
+["Panic alert broadcast","One-click campus-wide emergency alert","A","Web","core",false],
+["Gate pass management","Student / staff exit pass system","S A","Both","opt",false],
+]},
+{domain:"24. ★ AI LaunchPad (ALP)", color:"#7B2D8B", features:[
+["Tier Dashboard — Real-time Tier 1/2/3 Status","Student's current tier shown with visual indicator; color-coded criteria breakdown across CGPA, attendance, certifications and projects","S","Both","alp",true],
+["CGPA Tracker (Tier Criteria)","Live CGPA display mapped to tier threshold; historical CGPA trend chart; semester-wise breakdown","S F","Both","alp",true],
+["Attendance % (Tier Criteria)","Attendance % per subject and overall; traffic-light status vs tier threshold; auto-alert if approaching boundary","S F","Both","alp",true],
+["Certification Count (Tier Criteria)","Number of completed certifications mapped to tier requirement; remaining count shown clearly","S F","Both","alp",true],
+["Project Completion (Tier Criteria)","Count of approved projects submitted; link to project submission portal","S A","Both","alp",true],
+["Certification Roadmap Tracker","Visual progress map of all 6–10 required certifications (Google, AWS, Azure, NVIDIA, Coursera etc.)","S","Both","alp",true],
+["Certification Status per Cert","Per-certification status: Not Started / In Progress / Completed with completion date","S","Both","alp",true],
+["Direct Exam Registration Links","One-tap link to official exam booking portal for each certification (Google, AWS, Azure, NVIDIA)","S","Mob","alp",true],
+["Certification Deadline Reminders","Push and in-app alerts before exam registration and voucher expiry deadlines","S","Both","alp",true],
+["Akrivia HCM Live Data Sync","Real-time API sync with Akrivia HCM for certification completions, internship records and partner data","A","Web","alp",true],
+["Tier 1 Internship — Eligibility & Application","Shows Tier 1 eligibility status; allows application to campus / internal projects; timeline visibility","S A","Both","alp",true],
+["Tier 2 Internship — Eligibility & Application","Shows Tier 2 eligibility; lists Akrivia partner SME opportunities; shows application window dates","S A","Both","alp",true],
+["Tier 3 Internship — Eligibility & Application","Shows Tier 3 eligibility; lists top MNC opportunities via Akrivia; premium stipend visibility","S A","Both","alp",true],
+["Internship Application Tracker","Track status of internship applications across all tiers — Applied / Shortlisted / Offered / Accepted","S","Both","alp",true],
+["Internship Timeline Calendar","Visual calendar of all 3 internship windows with open/close dates per academic year","S A","Both","alp",true],
+["Personalized Action Items","AI-generated next-best-action cards: 'Complete AWS cert to reach Tier 2', 'Attend 3 more classes this week'","S","Both","alp",true],
+["Tier Progression Gap Analysis","Shows exactly what is missing to reach next tier — CGPA gap, certs remaining, projects needed","S","Both","alp",true],
+["Weekly ALP Nudge Notifications","Automated weekly push alert summarizing progress and one priority action for the week","S","Mob","alp",true],
+["ALP Score / Progress %","Composite ALP progress score showing how close student is to tier upgrade as a percentage","S F","Both","alp",true],
+["Value Stack Display (₹3.13L)","Visual breakdown of partner value each student receives: cloud vouchers, stipends, platform licenses","S P","Both","alp",true],
+["Partner Benefit Unlock Timeline","Shows which partner benefits unlock at which tier — motivates students to progress","S","Both","alp",true],
+["Mentor View — Cohort Dashboard","Faculty mentor sees all assigned mentees in a tier grid; color-coded Tier 1/2/3 status at a glance","F","Web","alp",true],
+["Mentor View — Intervention Alerts","Auto-alerts to mentor when mentee CGPA drops, attendance falls, cert deadline approaches","F","Both","alp",true],
+["Mentor View — Progress Timeline","Month-by-month tier journey for each mentee; track improvements and regressions","F","Web","alp",true],
+["Mentor View — Certification Gap per Mentee","See which certifications each mentee is missing to progress to the next tier","F","Web","alp",true],
+["Mentor Meeting & Notes Log","Log mentor-mentee meetings, discussion notes and agreed action items","F S","Both","alp",true],
+["Mentor Bulk Nudge","Send a targeted message or action prompt to all Tier 1 mentees in one click","F","Web","alp",true],
+["Parent View — Tier Status Card","Clear, jargon-free display of child's current tier and what it means for career outcome","P","Both","alp",true],
+["Parent View — Certification Progress","Progress bar: X of Y certifications done; expected timeline to completion","P","Both","alp",true],
+["Parent View — Internship Eligibility","Whether child qualifies for Tier 2 / Tier 3 Akrivia internships this cycle","P","Both","alp",true],
+["Parent View — Attendance & CGPA Summary","Traffic-light summary of attendance and CGPA vs tier threshold","P","Both","alp",true],
+["Parent ALP Alerts","Push / SMS when child's tier changes, cert is completed, or internship eligibility is unlocked","P","Mob","alp",true],
+["Admin — ALP Cohort Overview","University-wide view: how many students are in Tier 1 / 2 / 3 by department, batch, gender","A M","Web","alp",true],
+["Admin — ALP Tier Distribution Chart","Charts showing tier distribution trends over semesters — used in management reports","A M","Web","alp",true],
+["Admin — Certification Completion Rate","% of students who have completed each certification; identify lagging certs","A M","Web","alp",true],
+["Admin — Internship Conversion Funnel","Applied → Shortlisted → Offered → Accepted funnel per tier and batch","A M","Web","alp",true],
+["Akrivia HCM Integration — Internship Sync","Internship offers, acceptance and completion data auto-synced from Akrivia HCM to ALP dashboard","A","Web","alp",true],
+["ALP Reports for Accreditation","Export ALP data for NAAC, NIRF, placement reports — skill development and industry connect metrics","A M","Web","alp",true],
+]},
+{domain:"25. International Students & Compliance", color:"#534AB7", features:[
+["Visa & immigration document tracking","Manage visa deadlines and renewals","S A","Web","opt",false],
+["Multi-language interface","App available in multiple languages","S","Both","gth",false],
+["Cultural orientation resources","Guides for international students","S","Both","opt",false],
+["Exchange program management","Inbound/outbound student exchange","S A","Web","opt",false],
+["Foreign student registration (FRRO)","India-specific FRRO compliance","A","Web","opt",false],
+["Scholarship portal for international","Country-specific scholarships","S A","Web","opt",false],
+["Equivalency certificate management","Manage foreign degree equivalency","A R","Web","opt",false],
+]},
+{domain:"26. Parent Portal", color:"#7B2D8B", features:[
+["Parent login & profile","Secure parent access linked to ward's account","P","Both","core",false],
+["Attendance alerts","Real-time and daily digest of ward's attendance","P","Both","core",false],
+["Fee payment visibility","View outstanding fees and payment history","P","Both","core",false],
+["Results & grade card access","View ward's exam results and CGPA","P","Both","opt",false],
+["ALP Tier & certification status","Full ALP module summary for parent (from Module 24)","P","Both","alp",false],
+["Hostel status & notices","View hostel allocation and warden notices","P","Both","opt",false],
+["Communication with faculty","Message faculty / advisor directly","P F","Both","opt",false],
+["Emergency alerts","Receive campus emergency notifications","P","Mob","core",false],
+["Parent satisfaction survey","Periodic feedback from parents","P A","Both","opt",false],
+]},
+{domain:"27. System Administration & Configuration", color:"#444441", features:[
+["University branding & theming","Customize app colors, logo, name","A","Web","core",false],
+["Academic calendar configuration","Set all academic dates centrally","A","Web","core",false],
+["Module enable/disable toggle","Turn features on or off per role","A","Web","core",false],
+["User creation & bulk import","Add users via CSV upload","A","Web","core",false],
+["Integration management (API hub)","Connect third-party tools","A","Web","opt",false],
+["Audit log viewer","Track all system actions","A M","Web","core",false],
+["Backup & data management","Scheduled backups, data retention policies","A","Web","core",false],
+["Notification template manager","Customize SMS, email, push templates","A","Web","opt",false],
+["Fee structure configuration wizard","Configure complex fee structures","A","Web","core",false],
+["Document template management","Manage letter, certificate templates","A","Web","core",false],
+["Academic rules engine","Configure promotion, grading, attendance rules","A R","Web","core",false],
+["Third-party integrations","Zoom, Google, Turnitin, payment gateways, Akrivia","A","Web","opt",false],
+["Workflow & approval builder","Custom approval chains for any process","A M","Web","opt",false],
+["Data migration tools","Migrate from legacy systems","A","Web","opt",false],
+]}
+];
+
+let activePersona = 'all';
+let searchTerm = '';
+
+function getPreferredTheme(){
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+function getStoredTheme(){
+  try{ return localStorage.getItem('theme'); }catch(_){ return null; }
+}
+function setStoredTheme(value){
+  try{
+    if(value===null) localStorage.removeItem('theme');
+    else localStorage.setItem('theme', value);
+  }catch(_){}
+}
+function applyTheme(mode, source){
+  const root = document.documentElement;
+  root.dataset.theme = mode;
+  const btn = document.getElementById('themeToggle');
+  const label = document.getElementById('themeLabel');
+  const hint = document.getElementById('themeHint');
+  if(btn) btn.dataset.mode = mode;
+  if(label) label.textContent = mode === 'dark' ? 'Dark' : 'Light';
+  if(hint) hint.textContent = source === 'stored' ? '(saved)' : '(auto)';
+}
+function initTheme(){
+  const stored = getStoredTheme();
+  const mode = (stored === 'dark' || stored === 'light') ? stored : getPreferredTheme();
+  applyTheme(mode, stored ? 'stored' : 'auto');
+  if(window.matchMedia){
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      const stillAuto = !getStoredTheme();
+      if(stillAuto) applyTheme(getPreferredTheme(), 'auto');
+    });
+  }
+  const btn = document.getElementById('themeToggle');
+  if(btn){
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.dataset.theme || getPreferredTheme();
+      const next = current === 'dark' ? 'light' : 'dark';
+      setStoredTheme(next);
+      applyTheme(next, 'stored');
+    });
+    btn.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      setStoredTheme(null);
+      applyTheme(getPreferredTheme(), 'auto');
+    });
+  }
+}
+
+function matchPersona(f){
+  if(activePersona==='all')return true;
+  return f[2].includes(activePersona);
+}
+function matchSearch(f){
+  if(!searchTerm)return true;
+  const q=searchTerm.toLowerCase();
+  return f[0].toLowerCase().includes(q)||f[1].toLowerCase().includes(q);
+}
+function personaPills(str){
+  return str.trim().split(/\s+/).map(p=>`<span class="pill p-${p.toLowerCase()}">${p}</span>`).join('');
+}
+function channelLabel(ch){
+  if(ch==='Mob')return'<span class="ch-mob">Mob</span>';
+  if(ch==='Web')return'<span class="ch-web">Web</span>';
+  return'<span class="ch-both">Both</span>';
+}
+function prioLabel(p){
+  if(p==='core')return'<span class="prio-core">Core</span>';
+  if(p==='opt')return'<span class="prio-opt">Optional</span>';
+  if(p==='alp')return'<span class="prio-alp">ALP</span>';
+  return'<span class="prio-gth">Nice</span>';
+}
+
+function render(){
+  const container=document.getElementById('domains');
+  container.innerHTML='';
+  let total=0;
+  DATA.forEach((domain,di)=>{
+    const rows=domain.features.filter(f=>matchPersona(f)&&matchSearch(f));
+    total+=rows.length;
+    if(rows.length===0)return;
+    const isAlp = domain.color==='#7B2D8B' && di===23;
+    const block=document.createElement('div');
+    block.className='domain-block';
+    block.innerHTML=`
+      <div class="domain-hdr" onclick="toggleDomain(${di})">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${domain.color};flex-shrink:0"></span>
+        <span class="domain-name">${domain.domain}</span>
+        <span class="domain-count">${rows.length} features</span>
+        <span class="chevron" id="chev-${di}">▶</span>
+      </div>
+      <div class="feat-table" id="tbl-${di}">
+        <div class="feat-row hdr">
+          <span class="feat-hdr-label">Feature</span>
+          <span class="feat-hdr-label">Who uses it</span>
+          <span class="feat-hdr-label">Channel</span>
+          <span class="feat-hdr-label">Priority</span>
+        </div>
+        ${rows.map(f=>`
+        <div class="feat-row${f[5]?' alp-row':''}">
+          <div><div class="feat-name">${f[5]?'<span style="color:#7B2D8B;font-size:9px;font-weight:600;margin-right:4px;">ALP</span>':''}${f[0]}</div><div class="feat-desc">${f[1]}</div></div>
+          <div>${personaPills(f[2])}</div>
+          <div>${channelLabel(f[3])}</div>
+          <div>${prioLabel(f[4])}</div>
+        </div>`).join('')}
+      </div>`;
+    container.appendChild(block);
+
+    // Auto-open ALP domain and search results
+    if(isAlp || searchTerm){
+      setTimeout(()=>{
+        const tbl=document.getElementById('tbl-'+di);
+        const chev=document.getElementById('chev-'+di);
+        if(tbl){tbl.classList.add('open');}
+        if(chev){chev.classList.add('open');}
+      },10);
+    }
+  });
+  document.getElementById('cnt').textContent=total+' features';
+}
+
+function toggleDomain(di){
+  const tbl=document.getElementById('tbl-'+di);
+  const chev=document.getElementById('chev-'+di);
+  const open=tbl.classList.contains('open');
+  tbl.classList.toggle('open',!open);
+  chev.classList.toggle('open',!open);
+}
+function filterPersona(p,btn){
+  activePersona=p;
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));
+  btn.classList.add('on');
+  render();
+}
+function doSearch(){
+  searchTerm=document.getElementById('srch').value;
+  render();
+}
+
+initTheme();
+render();
+</script>
