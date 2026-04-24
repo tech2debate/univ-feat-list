@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Raghu University App Feature Matrix</title>
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -125,8 +131,99 @@ body{
   .actions{justify-content:flex-start}
   .feat-row{grid-template-columns: 1.6fr 1fr 64px 72px}
 }
+
+@media (max-width: 640px){
+  .root{padding:1rem 0 1.75rem}
+  .container{width:min(1120px, calc(100% - 22px))}
+  .search-row{flex-wrap:wrap}
+  .count-label{width:100%}
+  .domain-hdr{padding:12px 12px}
+  .feat-row.hdr{display:none}
+  .feat-row{
+    grid-template-columns: 1fr;
+    gap:8px;
+    padding:12px 12px;
+    align-items:start;
+  }
+  .feat-row > div[data-label]{
+    display:flex;
+    gap:10px;
+    align-items:baseline;
+    flex-wrap:wrap;
+  }
+  .feat-row > div[data-label]::before{
+    content: attr(data-label);
+    font-size:10px;
+    color: var(--color-text-tertiary);
+    font-weight:600;
+    letter-spacing:0.03em;
+    min-width: 86px;
+  }
+}
+
+.app-shell[hidden]{display:none !important}
+.lock-screen[hidden]{display:none !important}
+.lock-screen{
+  position:fixed;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  padding:18px;
+  background:rgba(2,6,23,0.55);
+  backdrop-filter: blur(10px);
+  z-index:9999;
+}
+.lock-card{
+  width:min(420px, 100%);
+  background:var(--color-background-primary);
+  color:var(--color-text-primary);
+  border:0.5px solid var(--color-border-tertiary);
+  border-radius:16px;
+  box-shadow: var(--shadow-elev-1);
+  padding:16px;
+}
+.lock-title{font-size:14px;font-weight:700;letter-spacing:0.01em}
+.lock-sub{margin-top:4px;font-size:12px;color:var(--color-text-secondary);line-height:1.35}
+.lock-form{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.lock-input{
+  flex:1;
+  min-width: 180px;
+  font-size:13px;
+  padding:10px 12px;
+  border:0.5px solid var(--color-border-secondary);
+  border-radius:12px;
+  background:var(--color-background-primary);
+  color:var(--color-text-primary);
+}
+.lock-input:focus-visible{outline:none;box-shadow:var(--focus-ring);border-color:rgba(55, 138, 221, 0.55)}
+.lock-btn{
+  padding:10px 12px;
+  border-radius:12px;
+  border:0.5px solid var(--color-border-secondary);
+  background:var(--color-text-primary);
+  color:var(--color-background-primary);
+  font-size:12px;font-weight:700;
+  cursor:pointer;
+}
+.lock-btn:active{transform:translateY(1px)}
+.lock-btn:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.lock-err{margin-top:10px;font-size:12px;color:#b42318;min-height:1.2em}
 </style>
 
+  </head>
+  <body>
+
+<div class="lock-screen" id="lockScreen" hidden>
+  <div class="lock-card" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+    <div class="lock-title" id="lockTitle">Locked</div>
+    <div class="lock-sub">Enter password to view the feature list.</div>
+    <form class="lock-form" id="lockForm">
+      <input class="lock-input" id="lockPwd" type="password" inputmode="text" autocomplete="current-password" placeholder="Password" aria-label="Password" />
+      <button class="lock-btn" type="submit">Unlock</button>
+    </form>
+    <div class="lock-err" id="lockErr" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="app-shell" id="appShell" hidden>
 <div class="root">
 
 <div class="container">
@@ -183,8 +280,12 @@ body{
 <div id="domains"></div>
 </div>
 </div>
+</div>
 
 <script>
+const FEATURE_PASSWORD = 'Raghu@5115';
+const UNLOCK_KEY = 'univ_feat_unlocked_v1';
+
 const DATA = [
 {domain:"01. Identity & Access Management", color:"#534AB7", features:[
 ["Single Sign-On (SSO) with university credentials","Login once, access all services","S F A R M","Both","core",false],
@@ -609,22 +710,16 @@ function applyTheme(mode, source){
   const hint = document.getElementById('themeHint');
   if(btn) btn.dataset.mode = mode;
   if(label) label.textContent = mode === 'dark' ? 'Dark' : 'Light';
-  if(hint) hint.textContent = source === 'stored' ? '(saved)' : '(auto)';
+  if(hint) hint.textContent = source === 'stored' ? '(saved)' : '(default)';
 }
 function initTheme(){
   const stored = getStoredTheme();
-  const mode = (stored === 'dark' || stored === 'light') ? stored : getPreferredTheme();
-  applyTheme(mode, stored ? 'stored' : 'auto');
-  if(window.matchMedia){
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      const stillAuto = !getStoredTheme();
-      if(stillAuto) applyTheme(getPreferredTheme(), 'auto');
-    });
-  }
+  const mode = (stored === 'dark' || stored === 'light') ? stored : 'light';
+  applyTheme(mode, stored ? 'stored' : 'default');
   const btn = document.getElementById('themeToggle');
   if(btn){
     btn.addEventListener('click', () => {
-      const current = document.documentElement.dataset.theme || getPreferredTheme();
+      const current = document.documentElement.dataset.theme || 'light';
       const next = current === 'dark' ? 'light' : 'dark';
       setStoredTheme(next);
       applyTheme(next, 'stored');
@@ -632,7 +727,7 @@ function initTheme(){
     btn.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       setStoredTheme(null);
-      applyTheme(getPreferredTheme(), 'auto');
+      applyTheme('light', 'default');
     });
   }
 }
@@ -669,7 +764,6 @@ function render(){
     const rows=domain.features.filter(f=>matchPersona(f)&&matchSearch(f));
     total+=rows.length;
     if(rows.length===0)return;
-    const isAlp = domain.color==='#7B2D8B' && di===23;
     const block=document.createElement('div');
     block.className='domain-block';
     block.innerHTML=`
@@ -689,15 +783,15 @@ function render(){
         ${rows.map(f=>`
         <div class="feat-row${f[5]?' alp-row':''}">
           <div><div class="feat-name">${f[5]?'<span style="color:#7B2D8B;font-size:9px;font-weight:600;margin-right:4px;">ALP</span>':''}${f[0]}</div><div class="feat-desc">${f[1]}</div></div>
-          <div>${personaPills(f[2])}</div>
-          <div>${channelLabel(f[3])}</div>
-          <div>${prioLabel(f[4])}</div>
+          <div data-label="Who uses it">${personaPills(f[2])}</div>
+          <div data-label="Channel">${channelLabel(f[3])}</div>
+          <div data-label="Priority">${prioLabel(f[4])}</div>
         </div>`).join('')}
       </div>`;
     container.appendChild(block);
 
-    // Auto-open ALP domain and search results
-    if(isAlp || searchTerm){
+    // Auto-open search results
+    if(searchTerm){
       setTimeout(()=>{
         const tbl=document.getElementById('tbl-'+di);
         const chev=document.getElementById('chev-'+di);
@@ -727,6 +821,54 @@ function doSearch(){
   render();
 }
 
+function isUnlocked(){
+  try{ return sessionStorage.getItem(UNLOCK_KEY)==='1'; }catch(_){ return false; }
+}
+function setUnlocked(){
+  try{ sessionStorage.setItem(UNLOCK_KEY,'1'); }catch(_){}
+}
+function showApp(){
+  const shell=document.getElementById('appShell');
+  const lock=document.getElementById('lockScreen');
+  if(lock) lock.hidden=true;
+  if(shell) shell.hidden=false;
+}
+function showLock(){
+  const shell=document.getElementById('appShell');
+  const lock=document.getElementById('lockScreen');
+  if(shell) shell.hidden=true;
+  if(lock) lock.hidden=false;
+  setTimeout(()=>{ const i=document.getElementById('lockPwd'); if(i) i.focus(); }, 0);
+}
+function initLock(){
+  const form=document.getElementById('lockForm');
+  const pwd=document.getElementById('lockPwd');
+  const err=document.getElementById('lockErr');
+  if(!form || !pwd) return;
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const val=(pwd.value||'').trim();
+    if(val===FEATURE_PASSWORD){
+      if(err) err.textContent='';
+      setUnlocked();
+      showApp();
+      render();
+    }else{
+      if(err) err.textContent='Incorrect password.';
+      pwd.select();
+    }
+  });
+}
+
 initTheme();
-render();
+initLock();
+if(isUnlocked()){
+  showApp();
+  render();
+}else{
+  showLock();
+}
 </script>
+
+  </body>
+  </html>
